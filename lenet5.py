@@ -48,8 +48,12 @@ def cnn_model_fn(features, labels, mode):
 
     # Dense layers
     pool2_flat = tf.reshape(pool2, [-1, 16 * 5 * 5])
-    dense1 = tf.layers.dense(inputs=pool2_flat, units=120,
-                             activation=tf.nn.tanh)
+    
+    dense1 = tf.layers.dense(
+        inputs=pool2_flat,
+        units=120,
+        activation=tf.nn.tanh)
+    
     dense2 = tf.layers.dense(inputs=dense1, units=84, activation=tf.nn.tanh)
 
     # Logits layer
@@ -77,27 +81,34 @@ def cnn_model_fn(features, labels, mode):
             loss=loss,
             global_step=tf.train.get_global_step())
 
-        return tf.estimator.EstimatorSpec(mode=mode, loss=loss,
-                                          train_op=train_op)
+        return tf.estimator.EstimatorSpec(
+            mode=mode,
+            loss=loss,
+            train_op=train_op)
 
     # Add evaluation metrics (for EVAL mode)
     eval_metric_ops = {
-        "accuracy": tf.metrics.accuracy(labels=labels,
-                                        predictions=predictions["classes"])}
+        "accuracy": tf.metrics.accuracy(
+            labels=labels,
+            predictions=predictions["classes"])}
 
-    return tf.estimator.EstimatorSpec(mode=mode, loss=loss,
-                                      eval_metric_ops=eval_metric_ops)
+    return tf.estimator.EstimatorSpec(
+        mode=mode,
+        loss=loss,
+        eval_metric_ops=eval_metric_ops)
 
 
 def run_model():
 
-    mnist_classifier = tf.estimator.Estimator(model_fn=cnn_model_fn,
-                                          model_dir='/tmp/lenet5')
+    mnist_classifier = tf.estimator.Estimator(
+        model_fn=cnn_model_fn,
+        model_dir='/tmp/lenet5')
 
     # Setup a logging hook for predictions
     tensor_to_log = {"probabilities": "softmax_tensor"}
-    logging_hook = tf.train.LoggingTensorHook(tensors=tensor_to_log,
-                                          every_n_iter=50)
+    logging_hook = tf.train.LoggingTensorHook(
+        tensors=tensor_to_log,
+        every_n_iter=50)
 
     # Train the model
     train_input_fn = tf.estimator.inputs.numpy_input_fn(
@@ -109,7 +120,7 @@ def run_model():
 
     mnist_classifier.train(
         input_fn = train_input_fn,
-        steps = 100000,
+        steps = 50000,
         hooks = [logging_hook])
 
     # Evaluate the model and print results
